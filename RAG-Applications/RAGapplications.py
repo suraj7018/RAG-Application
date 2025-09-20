@@ -36,7 +36,7 @@ os.environ["LANGCHAIN_PROJECT"]="RAG MEGA PROJECT"
 st.set_page_config(page_title="AI-Powered Knowledge Hub", page_icon="🤖", layout="wide", menu_items={
                      'Get Help': 'https://docs.streamlit.io/',
                      'Report a bug': 'https://github.com/Chhotoo-11/RAG-Applications/issues',
-                     'About': "This app was created by Chhotoo Solanki."
+                     'About': "This app was created by Suraj kumar."
     })
 st.title("🤖 AI Knowledge Assistant")
 
@@ -67,7 +67,7 @@ with st.sidebar:
 # Initialize LLM
 def get_llm():
     if api_mode == "GROQ API" and api_key:
-         return ChatGroq(groq_api_key=api_key, model_name="Gemma-7b-It")
+         return ChatGroq(groq_api_key=api_key, model_name="Gemma-9b-It")
 
     elif api_mode == "NVIDIA API" and api_key:
          return ChatNVIDIA(model="meta/llama3-70b-instruct", nvidia_api_key=api_key)
@@ -271,4 +271,5 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
