@@ -37,7 +37,7 @@ os.environ["LANGCHAIN_PROJECT"]="RAG MEGA PROJECT"
 ## Set up Streamlit app
 st.set_page_config(page_title="AI-Powered Knowledge Hub", page_icon="🤖", layout="wide", menu_items={
                      'Get Help': 'https://docs.streamlit.io/',
-                     'Report a bug': 'https://github.com/Chhotoo-11/RAG-Applications/issues',
+                     'Report a bug': 'https://github.com/suraj7018/RAG-Application/issues',
                      'About': "This app was created by Suraj kumar."
     })
 st.title("🤖 AI Knowledge Assistant")
@@ -283,6 +283,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
