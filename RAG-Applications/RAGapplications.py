@@ -272,7 +272,7 @@ else:
                                     ssl_verify=False
                                 )
 
-                                                             )
+                                                          
                             docs=loader.load()
                                         # Process and summarize the content
                             output_summary = process_and_summarize(docs)
@@ -283,6 +283,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
