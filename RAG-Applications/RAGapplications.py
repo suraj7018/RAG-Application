@@ -261,7 +261,17 @@ else:
                             if "youtube.com" in generic_url:
                                 loader=YoutubeLoader.from_youtube_url(generic_url,add_video_info=True)
                             else:
-                                loader=UnstructuredURLLoader(urls=[generic_url],ssl_verify=False,
+                                headers = {
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                                                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                                  "Chrome/118.0.0.0 Safari/537.36"
+                                }
+                                loader = UnstructuredURLLoader(
+                                    urls=[generic_url],
+                                    headers=headers,
+                                    ssl_verify=False
+                                )
+
                                                              )
                             docs=loader.load()
                                         # Process and summarize the content
@@ -273,6 +283,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
