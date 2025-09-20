@@ -16,11 +16,13 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.agents import initialize_agent, AgentType
-from langchain.callbacks import StreamlitCallbackHandler
+# from langchain.callbacks import StreamlitCallbackHandler
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, ChatNVIDIA
+from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
+
 #from langchain_chroma.vectorstores import Chroma
 from dotenv import load_dotenv
 load_dotenv()
@@ -214,7 +216,7 @@ else:
 
                 with st.chat_message("assistant"):
                     st_cb=StreamlitCallbackHandler(st.container(),expand_new_thoughts=False)
-                    response=search_agent.run(st.session_state.messages,callbacks=[st_cb])
+                    response=search_agent.invoke(st.session_state.messages,callbacks=[st_cb])
                     st.session_state.messages.append({'role':'assistant',"content":response})
                     st.write(response)
 
@@ -244,7 +246,7 @@ else:
                 
                 # Summarize each chunk
                 chain = load_summarize_chain(llm, chain_type="map_reduce", map_prompt=prompt, combine_prompt=prompt)
-                return chain.run(texts)
+                return chain.invoke(texts)
 
             if st.button("Summarize the Content from YT or Website"):
                 ## Validate all the inputs
@@ -271,6 +273,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
