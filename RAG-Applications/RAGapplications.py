@@ -5,8 +5,8 @@ import streamlit as st
 ## Langchain Imports
 from langchain_community.document_loaders import PyPDFLoader, YoutubeLoader, UnstructuredURLLoader
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_community.utilities import ArxivAPIWrapper,WikipediaAPIWrapper
-from langchain_community.tools import ArxivQueryRun,WikipediaQueryRun,DuckDuckGoSearchRun
+from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
+from langchain_community.tools import ArxivQueryRun, WikipediaQueryRun, DuckDuckGoSearchRun
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain 
 from langchain.chains.summarize import load_summarize_chain
@@ -23,15 +23,15 @@ from langchain_groq import ChatGroq
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, ChatNVIDIA
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 
-#from langchain_chroma.vectorstores import Chroma
+# from langchain_chroma.vectorstores import Chroma
 from dotenv import load_dotenv
 load_dotenv()
 from langchain_community.vectorstores import FAISS
 
 # Langsmith Tracking 
-os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY") 
-os.environ["LANGCHAIN_TRACING_V2"]="true" 
-os.environ["LANGCHAIN_PROJECT"]="RAG MEGA PROJECT"
+os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY") 
+os.environ["LANGCHAIN_TRACING_V2"] = "true" 
+os.environ["LANGCHAIN_PROJECT"] = "RAG MEGA PROJECT"
 
 
 ## Set up Streamlit app
@@ -90,26 +90,26 @@ else:
             uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
 
             os.environ["HF_TOKEN"] = os.getenv("HF_TOKEN")
-            embeddings= HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+            embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
             
             # Chat interface
-            session_id= st.text_input("Session ID:", value="default_session")
+            session_id = st.text_input("Session ID:", value="default_session")
 
             # Statefully manage chat history
             if "store" not in st.session_state:
-                st.session_state.store= {}
+                st.session_state.store = {}
 
             # Process uploaded PDF's:
             if uploaded_files:
-                documents= []
+                documents = []
                 for uploaded_file in uploaded_files:
-                    temppdf= f"./temp.pdf"
+                    temppdf = f"./temp.pdf"
                     with open(temppdf, 'wb') as file:
                         file.write(uploaded_file.getvalue())
-                        file_name= uploaded_file.name
+                        file_name = uploaded_file.name
                     
-                    loader= PyPDFLoader(temppdf)
-                    docs= loader.load()
+                    loader = PyPDFLoader(temppdf)
+                    docs = loader.load()
                     documents.extend(docs)
 
                 # Split and create embeddings for the documents
@@ -118,7 +118,7 @@ else:
                 vectorstore = FAISS.from_documents(documents=splits, embedding=embeddings)
                 retriever = vectorstore.as_retriever() 
 
-                contextualize_q_system_prompt=(
+                contextualize_q_system_prompt = (
                     "Given a chat history and the latest user question"
                     "which might reference context in the chat history, "
                     "formulate a standalone question which can be understood "
@@ -134,7 +134,7 @@ else:
                         ]
                 )
 
-                history_aware_retriever= create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
+                history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
 
                 # Answer question
                 system_prompt = (
@@ -154,16 +154,16 @@ else:
                         ]
                     )
                 
-                question_answer_chain= create_stuff_documents_chain(llm,qa_prompt)
-                rag_chain= create_retrieval_chain(history_aware_retriever,question_answer_chain)
+                question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+                rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
-                def get_session_history(session: str)->BaseChatMessageHistory:
+                def get_session_history(session: str) -> BaseChatMessageHistory:
                     if session_id not in st.session_state.store:
-                        st.session_state.store[session_id]= ChatMessageHistory()
+                        st.session_state.store[session_id] = ChatMessageHistory()
                     return st.session_state.store[session_id]
                 
-                conversational_rag_chain=RunnableWithMessageHistory(
-                    rag_chain,get_session_history,
+                conversational_rag_chain = RunnableWithMessageHistory(
+                    rag_chain, get_session_history,
                     input_messages_key="input",
                     history_messages_key="chat_history",
                     output_messages_key="answer"
@@ -171,17 +171,17 @@ else:
 
                 user_input = st.text_input("Your question:")
                 if user_input:
-                    session_history=get_session_history(session_id)
+                    session_history = get_session_history(session_id)
                     response = conversational_rag_chain.invoke(
                         {"input": user_input},
                         config={
-                            "configurable": {"session_id":session_id}
+                            "configurable": {"session_id": session_id}
                         },  # constructs a key "abc123" in `store`.
                     )
-                    #st.write(st.session_state.store)
-                    #st.write("Assistant:", response['answer'])
+                    # st.write(st.session_state.store)
+                    # st.write("Assistant:", response['answer'])
                     st.success(f"Assistant: {response['answer']}")
-                    #st.write("Chat History:", session_history.messages)
+                    # st.write("Chat History:", session_history.messages)
             
 
         ## Web Search
@@ -190,43 +190,35 @@ else:
             st.write("Easily search the web right from this app. Simply enter your query below to begin.")
     
             ## Tool setup
-            arxiv_wrapper=ArxivAPIWrapper(top_k_results=1, doc_content_chars_max=500)
-            arxiv=ArxivQueryRun(api_wrapper=arxiv_wrapper)
+            arxiv_wrapper = ArxivAPIWrapper(top_k_results=1, doc_content_chars_max=500)
+            arxiv = ArxivQueryRun(api_wrapper=arxiv_wrapper)
 
-            api_wrapper=WikipediaAPIWrapper(top_k_results=1,doc_content_chars_max=500)
-            wiki=WikipediaQueryRun(api_wrapper=api_wrapper)
+            api_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=500)
+            wiki = WikipediaQueryRun(api_wrapper=api_wrapper)
 
-            search=DuckDuckGoSearchRun(name="Search")
+            search = DuckDuckGoSearchRun(name="Search")
 
             if "messages" not in st.session_state:
-                st.session_state["messages"]=[
+                st.session_state["messages"] = [
                     {"role":"assisstant","content":"Hi,I'm a chatbot who can search the web. How can I help you?"}
                 ]
 
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg['content'])
 
-                      if prompt:=st.chat_input(placeholder="Welcome"):
-              st.session_state.messages.append({"role":"user","content":prompt})
-              st.chat_message("user").write(prompt)
-          
-              tools=[search,arxiv,wiki]
-          
-              search_agent=initialize_agent(
-                  tools,
-                  llm,
-                  agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-                  handle_parsing_errors=True
-              )
-          
-              with st.chat_message("assistant"):
-                  st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-                  response = search_agent.run(prompt, callbacks=[st_cb])   # ✅ fix here
-                  st.session_state.messages.append({'role':'assistant',"content":response})
-                  st.write(response)
+            if prompt:=st.chat_input(placeholder="Welcome"):
+                st.session_state.messages.append({"role":"user","content":prompt})
+                st.chat_message("user").write(prompt)
 
+                tools = [search, arxiv, wiki]
 
+                search_agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, handle_parsing_errors=True)
 
+                with st.chat_message("assistant"):
+                    st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+                    response = search_agent.invoke(st.session_state.messages, callbacks=[st_cb])
+                    st.session_state.messages.append({'role':'assistant',"content":response})
+                    st.write(response)
 
 
         ## 
@@ -234,7 +226,7 @@ else:
             st.header("URL/YouTube Summarizer")
             st.write("Enter a URL or YouTube link to quickly generate a concise summary of the content")
             
-            generic_url=st.text_input("Enter a URL",label_visibility="collapsed")
+            generic_url = st.text_input("Enter a URL", label_visibility="collapsed")
     
             prompt_template = """
             Provide a summary of the following content in 300 words:
@@ -267,7 +259,7 @@ else:
                         with st.spinner("Processing..."):
                             ## Loading the website or YT video data
                             if "youtube.com" in generic_url:
-                                loader=YoutubeLoader.from_youtube_url(generic_url,add_video_info=True)
+                                loader = YoutubeLoader.from_youtube_url(generic_url, add_video_info=True)
                             else:
                                 headers = {
                                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -281,8 +273,8 @@ else:
                                 )
 
                                                           
-                            docs=loader.load()
-                                        # Process and summarize the content
+                            docs = loader.load()
+                            # Process and summarize the content
                             output_summary = process_and_summarize(docs)
 
                             st.success(output_summary)
@@ -291,13 +283,3 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
-
-
-
-
-
-
-
-
-
-
