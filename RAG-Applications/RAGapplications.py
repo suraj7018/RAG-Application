@@ -69,7 +69,7 @@ with st.sidebar:
 # Initialize LLM
 def get_llm():
     if api_mode == "GROQ API" and api_key:
-         return ChatGroq(groq_api_key=api_key, model_name="llama-3.1-8b-instant")
+         return ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
 
     elif api_mode == "NVIDIA API" and api_key:
          return ChatNVIDIA(model="meta/llama3-70b-instruct", nvidia_api_key=api_key)
@@ -283,6 +283,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
