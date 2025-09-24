@@ -206,19 +206,25 @@ else:
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg['content'])
 
-            if prompt:=st.chat_input(placeholder="Welcome"):
-                st.session_state.messages.append({"role":"user","content":prompt})
-                st.chat_message("user").write(prompt)
+                      if prompt:=st.chat_input(placeholder="Welcome"):
+              st.session_state.messages.append({"role":"user","content":prompt})
+              st.chat_message("user").write(prompt)
+          
+              tools=[search,arxiv,wiki]
+          
+              search_agent=initialize_agent(
+                  tools,
+                  llm,
+                  agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                  handle_parsing_errors=True
+              )
+          
+              with st.chat_message("assistant"):
+                  st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+                  response = search_agent.run(prompt, callbacks=[st_cb])   # ✅ fix here
+                  st.session_state.messages.append({'role':'assistant',"content":response})
+                  st.write(response)
 
-                tools=[search,arxiv,wiki]
-
-                search_agent=initialize_agent(tools,llm,agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,handle_parsing_errors=True)
-
-                           with st.chat_message("assistant"):
-    st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-    response = search_agent.invoke(st.session_state.messages, callbacks=[st_cb])
-    st.session_state.messages.append({'role':'assistant', "content":response})
-    st.write(response)
 
 
 
@@ -285,6 +291,7 @@ else:
 
     else:
         st.error("Failed to initialize LLM. Please check your API key and selection.")
+
 
 
 
